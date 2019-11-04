@@ -246,7 +246,7 @@ class TaskGenerator:
                 rand_idx = random.randint(0, len(self.tasks) - 1)
                 task_to_sample = self.tasks[rand_idx]
             else:
-                # Then generate a sample task on the fly
+                # Then generate a sample task on the fly (如果没有指定task，则根据N-way K-shot设置，从所有类别中随机抽取N类/task)
                 task_to_sample = self._get_sample_task()
                 assert self._check_task(task_to_sample), ValueError("Randomly generated task is malformed.")
 
@@ -262,6 +262,8 @@ class TaskGenerator:
         # 4) Get required number of data points (step 1) from the classes to sample from (step 2)
         data_indices = []
         data_labels = []
+
+        # 从选定的task_to_sample/类别中，随机抽取shots个样本（这里data_indices是样本的id），并给所有shots个样本填充label
         for _class in task_to_sample:
             # select subset of indices from each of the classes and add it to data_indices
             data_indices.extend(np.random.choice(self.dataset.labels_to_indices[_class], shots, replace=False))
@@ -270,7 +272,7 @@ class TaskGenerator:
 
         # 5) Return data from step 4  wrapped in Sample Dataset
 
-        # map data indices to actual data
+        # map data indices to actual data（根据data_indices返回对应的文本内容）
         data = [self.dataset[idx][0] for idx in data_indices]
         return SampleDataset(data, data_labels, task_to_sample)
 

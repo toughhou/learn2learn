@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class NewsClassification(Dataset):
+class NewsClassificationDataset(Dataset):
     """
 
     [[Source]]()
@@ -57,7 +57,13 @@ class NewsClassification(Dataset):
         if root:
 
             if os.path.exists(self.path):
-                self.df_data = pd.read_csv(self.path)
+                origin_df = pd.read_csv(self.path)#缺少对数据的预处理，比如会出现nan导致训练出错
+                origin_df = origin_df.dropna(
+                axis=0,     # 0: 对行进行操作; 1: 对列进行操作
+                how='any',   # 'any': 只要存在 NaN 就 drop 掉; 'all': 必须全部是 NaN 才 drop
+                subset=['headline'] #只删除headline列中出现空值的行，其他的不做处理
+                )
+                self.df_data =origin_df.reset_index(drop=True)#重置索引
             else:
                 raise ValueError("Please download the file first.")
 

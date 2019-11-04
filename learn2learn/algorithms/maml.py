@@ -43,6 +43,7 @@ def maml_update(model, lr, grads=None):
             p.grad = g
 
     # Update the params
+    # 对module中的参数（如例子：weight, bais）依次做gd
     for param_key in model._parameters:
         p = model._parameters[param_key]
         if p is not None and p.grad is not None:
@@ -55,6 +56,7 @@ def maml_update(model, lr, grads=None):
             model._buffers[buffer_key] = buff - lr * buff.grad
 
     # Then, recurse for each submodule
+    # 遍历model的每一个module（如例子中的：dense, activation_fn, dropput, out_proj），对每一个module里的parameter做梯度更新
     for module_key in model._modules:
         model._modules[module_key] = maml_update(model._modules[module_key],
                                                  lr=lr,
